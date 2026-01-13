@@ -177,12 +177,14 @@ public partial class MAVLink
 
             // packet length
             int lengthtoread = 0;
+            int siglength = 0;
             if (buffer[0] == MAVLINK_STX)
             {
                 lengthtoread = buffer[1] + headerlengthstx + 2 - 2; // data + header + checksum - magic - length
                 if ((buffer[2] & MAVLINK_IFLAG_SIGNED) > 0)
                 {
                     lengthtoread += MAVLINK_SIGNATURE_BLOCK_LEN;
+                    siglength = MAVLINK_SIGNATURE_BLOCK_LEN;
                 }
             }
             else
@@ -206,7 +208,7 @@ public partial class MAVLink
             MAVLinkMessage message = new MAVLinkMessage(buffer, packettime);
 
             // calc crc
-            ushort crc = MavlinkCRC.crc_calculate(buffer, buffer.Length - 2);
+            ushort crc = MavlinkCRC.crc_calculate(buffer, buffer.Length - 2 - siglength);
 
             // calc extra bit of crc for mavlink 1.0+
             if (message.header == MAVLINK_STX || message.header == MAVLINK_STX_MAVLINK1)
